@@ -68,7 +68,7 @@ class Solve:
         total_cost = self.instance.get_solution_cost(assigned_generators, opened_generators)
         return assigned_generators, opened_generators, total_cost
 
-    def solve_heuristc(self, tabu_len=8000, run_time_sec=60):
+    def solve_heuristc(self, tabu_len=8000, run_time_sec=3):
 
         print("Solve with an heuristc algorithm")
 
@@ -95,6 +95,7 @@ class Solve:
 
         # validate and show the final solution
         self.print_solution()
+        return self.instance.get_solution_cost(self.best_solution.assigned_generators, self.best_solution.opened_generators)
 
     def print_solution(self):
 
