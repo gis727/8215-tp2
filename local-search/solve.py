@@ -48,27 +48,20 @@ class Solve:
         assigned_generators, opened_generators, total_cost = self.solve_naive()
         self.solution = Solution(assigned_generators, opened_generators, total_cost) # the current best solution in a local search
         self.best_solution = self.solution.get_copy() # the overall best solution
+        self.naive_trials = [x for x in range(self.n_generator)] # we will first try all naive solutions based on those gen indexes
 
-    def solve_naive(self):
+    def solve_naive(self, full_gen_index=0):
+        '''Set all devices on the generator with index = full_gen_index'''
         opened_generators = [1 for _ in range(self.n_generator)]
+        opened_generators[full_gen_index] = 1
 
-        assigned_generators = [None for _ in range(self.n_device)]
-
-        for i in range(self.n_device):
-            closest_generator = min(range(self.n_generator),
-                                    key=lambda j: self.instance.get_distance(self.instance.device_coordinates[i][0],
-                                                                      self.instance.device_coordinates[i][1],
-                                                                      self.instance.generator_coordinates[j][0],
-                                                                      self.instance.generator_coordinates[j][1])
-                                    )
-
-            assigned_generators[i] = closest_generator
+        assigned_generators = [full_gen_index for _ in range(self.n_device)]
 
         self.instance.solution_checker(assigned_generators, opened_generators)
         total_cost = self.instance.get_solution_cost(assigned_generators, opened_generators)
         return assigned_generators, opened_generators, total_cost
 
-    def solve_heuristc(self, tabu_len=8000, run_time_sec=3):
+    def solve_heuristc(self, tabu_len=5000, run_time_sec=30):
 
         print("Solve with an heuristc algorithm")
 
@@ -178,6 +171,15 @@ class Solve:
     def jump_to_random_neighbourhood(self):
 
         new_solution = self.best_solution
+
+        if (self.naive_trials):
+
+            gen_index = random.Random().choice(self.naive_trials)
+            self.naive_trials.remove(gen_index)
+            assigned_generators, opened_generators, total_cost = self.solve_naive(gen_index)
+            self.set_solution(Solution(assigned_generators, opened_generators, total_cost), force=True)
+            return
+
         solution_is_tabu = True
 
         while solution_is_tabu:
