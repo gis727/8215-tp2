@@ -92,32 +92,36 @@ class Solve:
         #=== has not improved  
         #=== - tLen: length of tabu length
         #=== - best: best objective
-         
+        
         y = [1 for _ in range(self.n_generator)] # generators/ y[i] = 1 if opened and 0 otherwise
         s_star = list(y) # initial solution
-        nbStableMax = 1000 
+        nbStableMax = 1000
         tLen = 10
+
         obj = self.distribute(s_star, -1)["total_cost"]
         best = obj
+
         tabu = [0]*len(y)
         nbStable = 0
         it = 0 # for iterations
         y_best = []
         while nbStable < nbStableMax:  
-          
+
             old = best
-            
+
             complement_tabu = []
             for i in range(len(s_star)):
                 if tabu[i] == 0 and s_star[i] != 0:
                     complement_tabu.append(i)
-                    
+
             if (len(complement_tabu) > 1): 
                 resultTemp = self.best_(s_star, complement_tabu, best)
-                if resultTemp["bestGain"] >= 0 and (len(resultTemp["bestFlips"]) > 1):
+             
+                if resultTemp["bestGain"] >= 0:                        
                     w = random.choice(resultTemp["bestFlips"])
                     y[w] = 1 - y[w]
                     obj = self.distribute(y, -1)["total_cost"]
+
                     tabu[w] = it + tLen
                     if obj < old and tLen > 2:
                         tLen -= 1
@@ -129,11 +133,13 @@ class Solve:
                     for i in range(len(y)):
                         if y[i] != 0:
                             openY.append(i)
+
                     if len(openY) > 1:                    
                         w = random.choice(openY)
                         y[w] = 0
                         obj = self.distribute(y, -1)["total_cost"]
-            
+
+
             if obj < best:
                 best = obj                
                 y_best = list(y)
@@ -141,22 +147,24 @@ class Solve:
                 nbStable = 0
             else:
                 nbStable += 1
-                
+
             for w in range(len(tabu)):
                 if tabu[w] < it and tabu[w] != 0:
                     tabu[w] = 0
+
+  
         
-      
-        
-        resFinal1 = self.distribute(y_best, -1)
+        y_final = list(y_best)
+            
+        resFinal1 = self.distribute(y_final, -1)
         assigned_generators1 = resFinal1["assigned_generators"]               
                 
-        self.instance.solution_checker(assigned_generators1, y_best)
-        total_cost1 = self.instance.get_solution_cost(assigned_generators1, y_best)
-        self.instance.plot_solution(assigned_generators1, y_best)
+        self.instance.solution_checker(assigned_generators1, y_final)
+        total_cost1 = self.instance.get_solution_cost(assigned_generators1, y_final)
+        self.instance.plot_solution(assigned_generators1, y_final)
                 
         print("[ASSIGNED-GENERATOR]", assigned_generators1)
-        print("[OPENED-GENERATOR]", y_best)  
+        print("[OPENED-GENERATOR]", y_final)  
         print("total cost", total_cost1)
         
         print("[SOLUTION-COSTBesttt]", best)
