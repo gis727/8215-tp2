@@ -21,9 +21,9 @@ positions[i,2] + shape[i,2] <= max_length
 
 % all objects do not overlap
 constraint forall(i in 1..n_object) ( forall(j in 1..n_object where i != j) (
-positions[i,1] + shape[i,1] <= positions[j,1] \/
 positions[j,1] + shape[j,1] <= positions[i,1] \/
 positions[i,2] + shape[i,2] <= positions[j,2] \/
+positions[i,1] + shape[i,1] <= positions[j,1] \/
 positions[j,2] + shape[j,2] <= positions[i,2]
 ));
 
